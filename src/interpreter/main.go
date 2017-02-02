@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
+	"sql"
 	"strings"
-
-	sql "github.com/benbjohnson/sql-parser"
 )
 
 func main() {
