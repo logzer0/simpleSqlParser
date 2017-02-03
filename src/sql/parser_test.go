@@ -1,24 +1,22 @@
-package sql_test
+package sql
 
 import (
 	"reflect"
 	"strings"
 	"testing"
-
-	"github.com/benbjohnson/sql-parser"
 )
 
 // Ensure the parser can parse strings into Statement ASTs.
 func TestParser_ParseStatement(t *testing.T) {
 	var tests = []struct {
 		s    string
-		stmt *sql.SelectStatement
+		stmt SelectStatement
 		err  string
 	}{
 		// Single field statement
 		{
 			s: `SELECT name FROM tbl`,
-			stmt: &sql.SelectStatement{
+			stmt: SelectStatement{
 				Fields:    []string{"name"},
 				TableName: "tbl",
 			},
@@ -27,7 +25,7 @@ func TestParser_ParseStatement(t *testing.T) {
 		// Multi-field statement
 		{
 			s: `SELECT first_name, last_name, age FROM my_table`,
-			stmt: &sql.SelectStatement{
+			stmt: SelectStatement{
 				Fields:    []string{"first_name", "last_name", "age"},
 				TableName: "my_table",
 			},
@@ -36,7 +34,7 @@ func TestParser_ParseStatement(t *testing.T) {
 		// Select all statement
 		{
 			s: `SELECT * FROM my_table`,
-			stmt: &sql.SelectStatement{
+			stmt: SelectStatement{
 				Fields:    []string{"*"},
 				TableName: "my_table",
 			},
@@ -50,7 +48,7 @@ func TestParser_ParseStatement(t *testing.T) {
 	}
 
 	for i, tt := range tests {
-		stmt, err := sql.NewParser(strings.NewReader(tt.s)).Parse()
+		stmt, err := NewParser(strings.NewReader(tt.s)).Parse()
 		if !reflect.DeepEqual(tt.err, errstring(err)) {
 			t.Errorf("%d. %q: error mismatch:\n  exp=%s\n  got=%s\n\n", i, tt.s, tt.err, err)
 		} else if tt.err == "" && !reflect.DeepEqual(tt.stmt, stmt) {

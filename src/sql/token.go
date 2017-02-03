@@ -13,16 +13,9 @@ const (
 	IDENT // main
 
 	// Misc characters
-	ASTERISK     // *
-	COMMA        // ,
-	LEFTBRACKET  // (
-	RIGHTBRACKET // )
-
+	ASTERISK // *
+	COMMA    // ,
 	// Keywords
 	SELECT
 	FROM
-
-	INSERT
-	INTO
-	VALUES
 )

@@ -29,24 +29,14 @@ func NewParser(r io.Reader) *Parser {
 // Parse parses a SQL SELECT statement.
 func (p *Parser) Parse() (interface{}, error) {
 
-	// First token should be a "SELECT" keyword.
-	tok, lit := p.scanIgnoreWhitespace()
-
-	switch tok {
-	case SELECT:
-		return p.ParseSelect()
-	case INSERT:
-	default:
-		return nil, fmt.Errorf("found %q, expected SELECT", lit)
-	}
-
-	// Return the successfully parsed statement.
-	return nil, nil
-}
-
-func (p *Parser) ParseSelect() (*SelectStatement, error) {
 	stmt := &SelectStatement{}
-	tok, lit := p.scanIgnoreWhitespace()
+	// First token should be a "SELECT" keyword.
+	if tok, lit := p.scanIgnoreWhitespace(); tok != SELECT {
+		return nil, fmt.Errorf("found %q, expected SELECT", lit)
+	} else {
+		p.unscan()
+		return p.ParseSelect()
+	}
 	// Next we should loop over all our comma-delimited fields.
 	for {
 		// Read a field.
@@ -69,13 +59,54 @@ func (p *Parser) ParseSelect() (*SelectStatement, error) {
 	}
 
 	// Finally we should read the table name.
-	tok, lit = p.scanIgnoreWhitespace()
+	tok, lit := p.scanIgnoreWhitespace()
 	if tok != IDENT {
 		return nil, fmt.Errorf("found %q, expected table name", lit)
 	}
 	stmt.TableName = lit
 
-	return stmt, nil
+	// Return the successfully parsed statement.
+	return *stmt, nil
+}
+
+func (p *Parser) ParseSelect() (SelectStatement, error) {
+
+	stmt := &SelectStatement{}
+	// First token should be a "SELECT" keyword.
+	if tok, lit := p.scanIgnoreWhitespace(); tok != SELECT {
+		return *stmt, fmt.Errorf("found %q, expected SELECT", lit)
+	}
+
+	// Next we should loop over all our comma-delimited fields.
+	for {
+		// Read a field.
+		tok, lit := p.scanIgnoreWhitespace()
+		if tok != IDENT && tok != ASTERISK {
+			return *stmt, fmt.Errorf("found %q, expected field", lit)
+		}
+		stmt.Fields = append(stmt.Fields, lit)
+
+		// If the next token is not a comma then break the loop.
+		if tok, _ := p.scanIgnoreWhitespace(); tok != COMMA {
+			p.unscan()
+			break
+		}
+	}
+
+	// Next we should see the "FROM" keyword.
+	if tok, lit := p.scanIgnoreWhitespace(); tok != FROM {
+		return *stmt, fmt.Errorf("found %q, expected FROM", lit)
+	}
+
+	// Finally we should read the table name.
+	tok, lit := p.scanIgnoreWhitespace()
+	if tok != IDENT {
+		return *stmt, fmt.Errorf("found %q, expected table name", lit)
+	}
+	stmt.TableName = lit
+
+	// Return the successfully parsed statement.
+	return *stmt, nil
 }
 
 // scan returns the next token from the underlying scanner.
