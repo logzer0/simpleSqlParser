@@ -41,7 +41,7 @@ func TestParser_ParseStatement(t *testing.T) {
 		},
 
 		// Errors
-		{s: `foo`, err: `found "foo", expected SELECT`},
+		{s: `foo`, err: `found "foo", expected SELECT/INSERT/CREATE`},
 		{s: `SELECT !`, err: `found "!", expected field`},
 		{s: `SELECT field xxx`, err: `found "xxx", expected FROM`},
 		{s: `SELECT field FROM *`, err: `found "*", expected table name`},

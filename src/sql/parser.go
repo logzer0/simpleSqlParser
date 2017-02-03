@@ -31,39 +31,16 @@ func (p *Parser) Parse() (interface{}, error) {
 
 	stmt := &SelectStatement{}
 	// First token should be a "SELECT" keyword.
-	if tok, lit := p.scanIgnoreWhitespace(); tok != SELECT {
-		return nil, fmt.Errorf("found %q, expected SELECT", lit)
-	} else {
+
+	tok, lit := p.scanIgnoreWhitespace()
+
+	switch tok {
+	case SELECT:
 		p.unscan()
 		return p.ParseSelect()
+	default:
+		return nil, fmt.Errorf("found %q, expected SELECT/INSERT/CREATE", lit)
 	}
-	// Next we should loop over all our comma-delimited fields.
-	for {
-		// Read a field.
-		tok, lit := p.scanIgnoreWhitespace()
-		if tok != IDENT && tok != ASTERISK {
-			return nil, fmt.Errorf("found %q, expected field", lit)
-		}
-		stmt.Fields = append(stmt.Fields, lit)
-
-		// If the next token is not a comma then break the loop.
-		if tok, _ := p.scanIgnoreWhitespace(); tok != COMMA {
-			p.unscan()
-			break
-		}
-	}
-
-	// Next we should see the "FROM" keyword.
-	if tok, lit := p.scanIgnoreWhitespace(); tok != FROM {
-		return nil, fmt.Errorf("found %q, expected FROM", lit)
-	}
-
-	// Finally we should read the table name.
-	tok, lit := p.scanIgnoreWhitespace()
-	if tok != IDENT {
-		return nil, fmt.Errorf("found %q, expected table name", lit)
-	}
-	stmt.TableName = lit
 
 	// Return the successfully parsed statement.
 	return *stmt, nil
