@@ -18,4 +18,5 @@ const (
 	// Keywords
 	SELECT
 	FROM
+	INSERT
 )

@@ -11,6 +11,12 @@ type SelectStatement struct {
 	TableName string
 }
 
+type InsertStatement struct {
+	MapValues map[string]interface{}
+	Values    []interface{}
+	TableName string
+}
+
 // Parser represents a parser.
 type Parser struct {
 	s   *Scanner
@@ -29,25 +35,35 @@ func NewParser(r io.Reader) *Parser {
 // Parse parses a SQL SELECT statement.
 func (p *Parser) Parse() (interface{}, error) {
 
-	stmt := &SelectStatement{}
-	// First token should be a "SELECT" keyword.
-
+	//Find the first token
 	tok, lit := p.scanIgnoreWhitespace()
 
 	switch tok {
 	case SELECT:
-		p.unscan()
+		p.unscan() //We unscan to get back to what we've already parsed
 		return p.ParseSelect()
+	case INSERT:
+		p.unscan()
 	default:
 		return nil, fmt.Errorf("found %q, expected SELECT/INSERT/CREATE", lit)
 	}
 
 	// Return the successfully parsed statement.
+	return nil, fmt.Errorf("Could not parse the statement")
+}
+
+func (p *Parser) ParseInsert() (InsertStatement, error) {
+	stmt := &InsertStatement{}
+
+	if tok, lit := p.scanIgnoreWhitespace(); tok != INSERT {
+		return *stmt, fmt.Errorf("found %q, expected INSERT", lit)
+	}
+
 	return *stmt, nil
 }
 
+//ParseSelect parses the given string and returns an instance of SelectStatement
 func (p *Parser) ParseSelect() (SelectStatement, error) {
-
 	stmt := &SelectStatement{}
 	// First token should be a "SELECT" keyword.
 	if tok, lit := p.scanIgnoreWhitespace(); tok != SELECT {
