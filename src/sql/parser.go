@@ -44,6 +44,7 @@ func (p *Parser) Parse() (interface{}, error) {
 		return p.ParseSelect()
 	case INSERT:
 		p.unscan()
+		return p.ParseInsert()
 	default:
 		return nil, fmt.Errorf("found %q, expected SELECT/INSERT/CREATE", lit)
 	}
@@ -52,11 +53,20 @@ func (p *Parser) Parse() (interface{}, error) {
 	return nil, fmt.Errorf("Could not parse the statement")
 }
 
+//ParseInsert parses the given string and returns an instance of InsertStatement
 func (p *Parser) ParseInsert() (InsertStatement, error) {
 	stmt := &InsertStatement{}
 
 	if tok, lit := p.scanIgnoreWhitespace(); tok != INSERT {
 		return *stmt, fmt.Errorf("found %q, expected INSERT", lit)
+	}
+
+	if tok, lit := p.scanIgnoreWhitespace(); tok != INTO {
+		return *stmt, fmt.Errorf("found %q, expected INTO", lit)
+	}
+
+	if tok, lit := p.scanIgnoreWhitespace(); tokenMap[tok] {
+		return *stmt, fmt.Errorf("found %q, table name cannot be a keyword", lit)
 	}
 
 	return *stmt, nil

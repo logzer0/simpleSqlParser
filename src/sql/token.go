@@ -19,4 +19,20 @@ const (
 	SELECT
 	FROM
 	INSERT
+	INTO
+	VALUES
 )
+
+var tokenMap = map[Token]bool{
+	ILLEGAL:  true,
+	EOF:      true,
+	WS:       true,
+	IDENT:    true,
+	ASTERISK: true,
+	COMMA:    true,
+	SELECT:   true,
+	FROM:     true,
+	INSERT:   true,
+	INTO:     true,
+	VALUES:   true,
+}
