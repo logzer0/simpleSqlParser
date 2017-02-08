@@ -1,15 +1,20 @@
 package main
 
 type SQL Peg {
- Expression
+ SelectStatement
 }
 
-G <- "SELECT"_ Columns _ "FROM" _ Table _";" !.
-Columns  <-  '(' ColList  ')'
-ColList <- (ColName ',')* ColName
-ColName <- < AlphaNum+ > { p.captureColName(buffer[begin:end]) }
+G <- SelectStatement !.
 
-Table <- < "tbl" > { p.TableName = buffer[begin:end] }
+SelectStatement <- "SELECT"_ Columns _ "FROM" _ Table _";" 
+
+
+Columns  <-  ParaColList / ColList / Asterisk 
+ParaColList <- '(' _ ColList _ ')'
+ColList <- (ColName _  ',' _  )* ColName
+ColName <- < AlphaNum+ > { p.SelectStatement.Columns = append( p.SelectStatement.Columns  ,buffer[begin:end]) }
+
+Table <- < "tbl" > { p.SelectStatement.TableName = buffer[begin:end] }
 
 
 
@@ -22,3 +27,5 @@ _            <- (ws / lineComment / blockComment)*
 Letter   <- [a-zA-Z_]
 Number   <- [0-9]
 AlphaNum <- (Letter / Number)
+
+Asterisk <- '*' { p.SelectStatement.AllColumns = true }

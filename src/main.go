@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	expression := "SELECT (foo) FROM tbl;"
+	expression := "Select (col1,col2, col3) from tbl;"
 	calc := &SQL{Buffer: expression}
 	calc.Init()
 	if err := calc.Parse(); err != nil {
@@ -15,5 +15,5 @@ func main() {
 	}
 	calc.Print()
 	calc.Execute()
-	fmt.Println(calc.Expression)
+	fmt.Println(calc.SelectStatement)
 }
