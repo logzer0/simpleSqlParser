@@ -1,0 +1,24 @@
+package main
+
+type SQL Peg {
+ Expression
+}
+
+G <- "SELECT"_ Columns _ "FROM" _ Table _";" !.
+Columns  <-  '(' ColList  ')'
+ColList <- (ColName ',')* ColName
+ColName <- < AlphaNum+ > { p.captureColName(buffer[begin:end]) }
+
+Table <- < "tbl" > { p.TableName = buffer[begin:end] }
+
+
+
+lineComment  <- '//' (!'\n' .)*
+blockComment <- '/*' (!'*/' (. / '\n'))* '*/'
+ws           <- [ \t\n\r]
+_            <- (ws / lineComment / blockComment)*
+
+
+Letter   <- [a-zA-Z_]
+Number   <- [0-9]
+AlphaNum <- (Letter / Number)
