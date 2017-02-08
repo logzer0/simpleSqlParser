@@ -15,7 +15,7 @@ func errstring(err error) string {
 }
 
 // Ensure the parser can parse strings into Statement ASTs.
-func TestParser_ParseStatement(t *testing.T) {
+func TestParser_SelectStatement(t *testing.T) {
 	var tests = []struct {
 		s    string
 		stmt SelectStatement
@@ -65,24 +65,25 @@ func TestParser_ParseStatement(t *testing.T) {
 	}
 }
 
-func TestParser_SelectStatement(t *testing.T) {
+func TestParser_InsertStatement(t *testing.T) {
 	var tests = []struct {
 		s    string
 		stmt InsertStatement
 		err  string
 	}{
 		{
-			s: `INSERT INTO tbl(a,b,c) VALUES("a","b","c");`,
+			s: `INSERT INTO tbl(a,b,c) VALUES(a,b,c);`,
 			stmt: InsertStatement{
 				MapValues: map[string]interface{}{
 					"a": "a",
 					"b": "b",
 					"c": "c",
 				},
+				TableName: "tbl",
 			},
 		},
 		{
-			s: `INSERT INTO tbl VALUES("a","b","c");`,
+			s: `INSERT INTO tbl VALUES(a,b,c);`,
 			stmt: InsertStatement{
 				Values: []interface{}{
 					"a",
@@ -92,6 +93,7 @@ func TestParser_SelectStatement(t *testing.T) {
 					1.4,
 					'c',
 				},
+				TableName: "tbl",
 			},
 		},
 
@@ -100,8 +102,8 @@ func TestParser_SelectStatement(t *testing.T) {
 		{s: `foo`, err: `found "foo", expected SELECT/INSERT/CREATE`},
 		{s: `INSERT tbl"`, err: `found "tbl", expected INTO`},
 		{s: `INSERT INTO VALUES VALUES ("a", "b","c");`, err: `found "VALUES", table name cannot be a keyword`},
-		{s: `INSERT INTO tbl VALUES "a","b","c"`, err: `found \", expected (`},
-		{s: `INSERT INTO tbl VALUES ("a","b","c"`, err: `found, expected )`},
+		{s: `INSERT INTO tbl VALUES a,b,c`, err: `found \", expected (`},
+		{s: `INSERT INTO tbl VALUES (a,b,c`, err: `found, expected )`},
 		{s: `INSERT INTO tbl(a,v,c) VALUES`, err: `found, expected (`},
 		{s: `INSERT INTO tbl(a,v,c) VALUES("a","b",1,2.2);`, err: `found, expected (`},
 	}

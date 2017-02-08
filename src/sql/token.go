@@ -27,7 +27,6 @@ var tokenMap = map[Token]bool{
 	ILLEGAL:  true,
 	EOF:      true,
 	WS:       true,
-	IDENT:    true,
 	ASTERISK: true,
 	COMMA:    true,
 	SELECT:   true,

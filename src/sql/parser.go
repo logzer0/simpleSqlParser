@@ -67,6 +67,8 @@ func (p *Parser) ParseInsert() (InsertStatement, error) {
 
 	if tok, lit := p.scanIgnoreWhitespace(); tokenMap[tok] {
 		return *stmt, fmt.Errorf("found %q, table name cannot be a keyword", lit)
+	} else {
+		stmt.TableName = lit
 	}
 
 	return *stmt, nil
