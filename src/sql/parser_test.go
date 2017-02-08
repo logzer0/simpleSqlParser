@@ -102,6 +102,7 @@ func TestParser_InsertStatement(t *testing.T) {
 		{s: `foo`, err: `found "foo", expected SELECT/INSERT/CREATE`},
 		{s: `INSERT tbl"`, err: `found "tbl", expected INTO`},
 		{s: `INSERT INTO VALUES VALUES ("a", "b","c");`, err: `found "VALUES", table name cannot be a keyword`},
+		{s: `INSERT INTO tbl (a,b,c)`, err: `found "(", expected VALUES`},
 		{s: `INSERT INTO tbl VALUES a,b,c`, err: `found \", expected (`},
 		{s: `INSERT INTO tbl VALUES (a,b,c`, err: `found, expected )`},
 		{s: `INSERT INTO tbl(a,v,c) VALUES`, err: `found, expected (`},

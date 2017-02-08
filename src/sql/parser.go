@@ -71,6 +71,10 @@ func (p *Parser) ParseInsert() (InsertStatement, error) {
 		stmt.TableName = lit
 	}
 
+	if tok, lit := p.scanIgnoreWhitespace(); tok != VALUES {
+		return *stmt, fmt.Errorf("found %q, expected VALUES", lit)
+	}
+
 	return *stmt, nil
 }
 
