@@ -8,7 +8,6 @@ import (
 )
 
 func TestSelect(t *testing.T) {
-
 	tests := []struct {
 		s    string
 		stmt SelectStatement
@@ -46,4 +45,13 @@ func TestSelect(t *testing.T) {
 
 	}
 
+}
+
+func TestInsert(t *testing.T) {
+	s := `Insert into tbl values( 1, "a", 1.224  );`
+	got := &SQL{Buffer: s}
+	got.Init()
+	if err := got.Parse(); assert.Nil(t, err) {
+		got.Execute()
+	}
 }

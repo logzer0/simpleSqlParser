@@ -5,3 +5,9 @@ type SelectStatement struct {
 	TableName  string
 	AllColumns bool
 }
+
+type InsertStatement struct {
+	TableName        string
+	ColumnsAndValues map[string]interface{}
+	Values           interface{}
+}

@@ -2,12 +2,12 @@ package main
 
 type SQL Peg {
  SelectStatement
+ InsertStatement
 }
 
-G <- SelectStatement !.
+G <- SelectStatement / InsertStatement !.
 
 SelectStatement <- "SELECT"_ Columns _ "FROM" _ Table _";" 
-
 
 Columns  <-  ParaColList / ColList / Asterisk 
 ParaColList <- '(' _ ColList _ ')'
@@ -16,16 +16,15 @@ ColName <- < AlphaNum+ > { p.SelectStatement.Columns = append( p.SelectStatement
 
 Table <- < "tbl" > { p.SelectStatement.TableName = buffer[begin:end] }
 
-
-
 lineComment  <- '//' (!'\n' .)*
 blockComment <- '/*' (!'*/' (. / '\n'))* '*/'
 ws           <- [ \t\n\r]
 _            <- (ws / lineComment / blockComment)*
-
 
 Letter   <- [a-zA-Z_]
 Number   <- [0-9]
 AlphaNum <- (Letter / Number)
 
 Asterisk <- '*' { p.SelectStatement.AllColumns = true }
+
+InsertStatement <- "Insert into tbl values( 1, \"a\", 1.224  );"
