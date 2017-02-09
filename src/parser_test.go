@@ -13,9 +13,9 @@ func TestSelect(t *testing.T) {
 		stmt SelectStatement
 	}{
 		{
-			s: `SELECT foo FROM tbl;`,
+			s: `SELECT foo FROM tbl1;`,
 			stmt: SelectStatement{
-				TableName: "tbl",
+				TableName: "tbl1",
 				Columns:   []string{"foo"},
 			},
 		},
@@ -48,10 +48,32 @@ func TestSelect(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	s := `Insert into tbl values( 1, "a", 1.224  );`
-	got := &SQL{Buffer: s}
-	got.Init()
-	if err := got.Parse(); assert.Nil(t, err) {
-		got.Execute()
+	tests := []struct {
+		s    string
+		stmt InsertStatement
+	}{
+		{
+			s: `Insert into instaTbl values ( 1, "a",1.123, "d"   );`,
+			stmt: InsertStatement{
+				TableName: "tbl",
+				Values:    []string{"1", "a", "1.123", "d"},
+			},
+		},
 	}
+
+	for i, eachTest := range tests {
+		got := &SQL{Buffer: eachTest.s}
+		got.Init()
+		if err := got.Parse(); assert.Nil(t, err) {
+			got.Execute()
+			assert.Equal(t, got.InsertStatement, eachTest.stmt, fmt.Sprint("Test Case %d ", i))
+		}
+	}
+
+	// s := `Insert into tbl values( 1, "a", 1.224  );`
+	// got := &SQL{Buffer: s}
+	// got.Init()
+	// if err := got.Parse(); assert.Nil(t, err) {
+	// 	got.Execute()
+	// }
 }

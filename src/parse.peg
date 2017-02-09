@@ -1,30 +1,62 @@
 package main
 
 type SQL Peg {
- SelectStatement
- InsertStatement
+	Expression
 }
 
-G <- SelectStatement / InsertStatement !.
+G <- SelectStatement / InsertStatement !. { fmt.Println("I should be first")}
 
-SelectStatement <- "SELECT"_ Columns _ "FROM" _ Table _";" 
 
-Columns  <-  ParaColList / ColList / Asterisk 
+# Columns defn
+Columns  <-  ParaColList / ColList / Asterisk  
 ParaColList <- '(' _ ColList _ ')'
 ColList <- (ColName _  ',' _  )* ColName
-ColName <- < AlphaNum+ > { p.SelectStatement.Columns = append( p.SelectStatement.Columns  ,buffer[begin:end]) }
+ColName <- < AlphaNum+ > { p.captureColumns(buffer[begin:end])  }
 
-Table <- < "tbl" > { p.SelectStatement.TableName = buffer[begin:end] }
 
+
+# Select
+SelectStatement <-  "SELECT"_ Columns _ "FROM" _ Table _";"  { p.captureType(buffer[begin:end]); fmt.Println("Is this second?") }
+
+
+#Insert
+InsertStatement <-  < "INSERT" _ "INTO" _ InsertBody >    { p.captureType(buffer[begin:end]) ; fmt.Println("Is this the second one?");  }
+
+
+
+
+# Insert Body
+InsertBody <- <  Table  _ Values _ ";"  > { fmt.Println("Bro "); p.captureType("INSERT"); fmt.Println("Bro");   }
+
+# Values defn
+Values <- ParaColList? _ "VALUES" _ ValuesBody
+
+# ValuesBody defn
+ValuesBody <- '(' _ ValList  _ ')'
+
+ValList <- ( _ InsertValue _ ',' _  )* _ InsertValue
+InsertValue <- '"'? EachValue '"'?
+EachValue <- <   AlphaNum+  > { p.captureValues(buffer[begin:end]) }
+
+
+
+# Symbols
+Asterisk <- '*' { p.SelectStatement.AllColumns = true }
+
+
+# Comments and whitespace
 lineComment  <- '//' (!'\n' .)*
 blockComment <- '/*' (!'*/' (. / '\n'))* '*/'
 ws           <- [ \t\n\r]
 _            <- (ws / lineComment / blockComment)*
 
+
+# Numbers and letters
 Letter   <- [a-zA-Z_]
-Number   <- [0-9]
+Number   <- [0-9] '.'? [0-9]*
 AlphaNum <- (Letter / Number)
 
-Asterisk <- '*' { p.SelectStatement.AllColumns = true }
+# Table defn
+Table <- < AlphaNum+ > { fmt.Println(p.Expression.sType," This is the type I think");  p.captureTableName(buffer[begin:end]) }
 
-InsertStatement <- "Insert into tbl values( 1, \"a\", 1.224  );"
+
