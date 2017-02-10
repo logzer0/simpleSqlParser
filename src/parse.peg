@@ -1,35 +1,38 @@
 package main
 
 type SQL Peg {
-	Expression
+	sType 
+	SelectStatement
+	InsertStatement
 }
 
-G <- SelectStatement / InsertStatement !. { fmt.Println("I should be first")}
+G <- SelectStatement / InsertStatement !. 
 
 
 # Columns defn
-Columns  <-  ParaColList / ColList / Asterisk  
-ParaColList <- '(' _ ColList _ ')'
-ColList <- (ColName _  ',' _  )* ColName
-ColName <- < AlphaNum+ > { p.captureColumns(buffer[begin:end])  }
+Columns  <-  SelectParaColList / SelectColList / Asterisk  
+SelectParaColList <- '(' _ SelectColList  _ ')'
+SelectColList <- (SelectColName _  ',' _  )* SelectColName
+SelectColName <- < AlphaNum+ > { p.SelectStatement.Columns = append(p.SelectStatement.Columns, buffer[begin:end]) }
 
+InsertParaColList <- '(' _ InsertColList  _ ')'
+InsertColList <- (InsertColName _  ',' _  )* InsertColName
+InsertColName <- < AlphaNum+ > { p.InsertStatement.Columns = append(p.InsertStatement.Columns,buffer[begin:end]) }
 
 
 # Select
-SelectStatement <-  "SELECT"_ Columns _ "FROM" _ Table _";"  { p.captureType(buffer[begin:end]); fmt.Println("Is this second?") }
+SelectStatement <-  "SELECT"_ Columns _ "FROM" _ SelectTable _";"  { p.sType = Select  }
 
 
 #Insert
-InsertStatement <-  < "INSERT" _ "INTO" _ InsertBody >    { p.captureType(buffer[begin:end]) ; fmt.Println("Is this the second one?");  }
-
-
+InsertStatement <-   "INSERT" _ "INTO" _ InsertBody     { p.validateInsert() }
 
 
 # Insert Body
-InsertBody <- <  Table  _ Values _ ";"  > { fmt.Println("Bro "); p.captureType("INSERT"); fmt.Println("Bro");   }
+InsertBody <-   InsertTable  _ Values _ ";"   
 
 # Values defn
-Values <- ParaColList? _ "VALUES" _ ValuesBody
+Values <- InsertParaColList? _ "VALUES" _ ValuesBody
 
 # ValuesBody defn
 ValuesBody <- '(' _ ValList  _ ')'
@@ -37,8 +40,6 @@ ValuesBody <- '(' _ ValList  _ ')'
 ValList <- ( _ InsertValue _ ',' _  )* _ InsertValue
 InsertValue <- '"'? EachValue '"'?
 EachValue <- <   AlphaNum+  > { p.captureValues(buffer[begin:end]) }
-
-
 
 # Symbols
 Asterisk <- '*' { p.SelectStatement.AllColumns = true }
@@ -53,10 +54,11 @@ _            <- (ws / lineComment / blockComment)*
 
 # Numbers and letters
 Letter   <- [a-zA-Z_]
-Number   <- [0-9] '.'? [0-9]*
+Number   <- [0-9] ('.' [0-9])*
 AlphaNum <- (Letter / Number)
 
 # Table defn
-Table <- < AlphaNum+ > { fmt.Println(p.Expression.sType," This is the type I think");  p.captureTableName(buffer[begin:end]) }
+SelectTable <- < AlphaNum+ > { p.SelectStatement.TableName = buffer [begin:end] }
+InsertTable <- < AlphaNum+ > { p.InsertStatement.TableName = buffer[begin:end]  }
 
 

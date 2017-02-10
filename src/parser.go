@@ -1,15 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"log"
-)
-
-type Expression struct {
-	sType           stmtType
-	SelectStatement SelectStatement
-	InsertStatement InsertStatement
-}
+import "fmt"
 
 type SelectStatement struct {
 	Columns    []string
@@ -23,52 +14,25 @@ type InsertStatement struct {
 	Values    []string
 }
 
-type stmtType int
+type sType int
 
 const (
-	Select stmtType = iota
+	Select sType = iota
 	Insert
 	Create
 )
 
-func (s *SQL) captureType(v string) {
-	switch v {
-	case "INSERT":
-		fmt.Println("Captured an Insert")
-		s.Expression.sType = Insert
-	case "SELECT":
-		fmt.Println("Captured a Select")
-		s.Expression.sType = Select
-	}
-}
-
-func (s *SQL) captureTableName(v string) {
-	fmt.Println("The table name is ", v, "  ", s.Expression.sType)
-	switch s.Expression.sType {
-	case Select:
-		s.SelectStatement.TableName = v
-	case Insert:
-		s.InsertStatement.TableName = v
-	case Create:
-		//To-do: Implement this
-	default:
-		log.Println("Error. This is not supported yet!")
-	}
-}
-
-func (s *SQL) captureColumns(v string) {
-	switch s.Expression.sType {
-	case Select:
-		s.SelectStatement.Columns = append(s.SelectStatement.Columns, v)
-	case Insert:
-		s.InsertStatement.Columns = append(s.InsertStatement.Columns, v)
-	case Create:
-		//To-do
-	default:
-		log.Println("Error. This is not supported yet!")
-	}
-}
-
 func (s *SQL) captureValues(v string) {
 	s.InsertStatement.Values = append(s.InsertStatement.Values, v)
+}
+
+func (s *SQL) validateInsert() {
+	s.sType = Insert
+	if len(s.InsertStatement.Columns) < 1 {
+		//We are good
+	} else if len(s.InsertStatement.Columns) != len(s.InsertStatement.Values) {
+		s.InsertStatement = InsertStatement{}
+		fmt.Errorf(fmt.Sprintf("Columns and Values do not match. %d columns provided for %d values ", len(s.InsertStatement.Columns), len(s.InsertStatement.Values)))
+	}
+
 }

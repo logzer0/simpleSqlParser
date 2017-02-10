@@ -55,9 +55,20 @@ func TestInsert(t *testing.T) {
 		{
 			s: `Insert into instaTbl values ( 1, "a",1.123, "d"   );`,
 			stmt: InsertStatement{
-				TableName: "tbl",
+				TableName: "instaTbl",
 				Values:    []string{"1", "a", "1.123", "d"},
 			},
+		},
+		{
+			s: `INSERT INTO insertTable(a,b,c)values("a",23434, 23.533536);`,
+			stmt: InsertStatement{
+				TableName: "insertTable",
+				Values:    []string{"a", "23434", "23.533536"},
+				Columns:   []string{"a", "b", "c"},
+			},
+		},
+		{
+			s: `INSERT INTO kaboo(a,b,c) VALUES (1);`,
 		},
 	}
 
@@ -66,7 +77,7 @@ func TestInsert(t *testing.T) {
 		got.Init()
 		if err := got.Parse(); assert.Nil(t, err) {
 			got.Execute()
-			assert.Equal(t, got.InsertStatement, eachTest.stmt, fmt.Sprint("Test Case %d ", i))
+			assert.Equal(t, got.InsertStatement, eachTest.stmt, fmt.Sprintf("Test Case %d ", i))
 		}
 	}
 
