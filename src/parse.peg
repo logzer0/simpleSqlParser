@@ -4,9 +4,10 @@ type SQL Peg {
 	sType 
 	SelectStatement
 	InsertStatement
+	CreateStatement
 }
 
-G <- SelectStatement / InsertStatement !. 
+G <- SelectStatement / InsertStatement / CreateStatement !. 
 
 
 # Columns defn
@@ -16,16 +17,23 @@ SelectColList <- (SelectColName _  ',' _  )* SelectColName
 SelectColName <- < AlphaNum+ > { p.SelectStatement.Columns = append(p.SelectStatement.Columns, buffer[begin:end]) }
 
 InsertParaColList <- '(' _ InsertColList  _ ')'
-InsertColList <- (InsertColName _  ',' _  )* InsertColName
+InsertColList <- (_ InsertColName _  ',' _  )* InsertColName
 InsertColName <- < AlphaNum+ > { p.InsertStatement.Columns = append(p.InsertStatement.Columns,buffer[begin:end]) }
+
+CreateParaColList <- '(' _ CreateColList _  ')'
+CreateColList <- ( _ CreateColName _ ',' _  )* CreateColName
+CreateColName <- < AlphaNum+ > { p.CreateStatement.Columns = append(p.CreateStatement.Columns, buffer[begin:end]) }
 
 
 # Select
-SelectStatement <-  "SELECT"_ Columns _ "FROM" _ SelectTable _";"  { p.sType = Select  }
+SelectStatement <-  "SELECT" _ Columns _ "FROM" _ SelectTable _";"  { p.sType = Select  }
 
 
 #Insert
 InsertStatement <-   "INSERT" _ "INTO" _ InsertBody     { p.validateInsert() }
+
+# Create
+CreateStatement <- "CREATE" _  "Table" _ CreateTable _ CreateParaColList _ ';' { p.setPartitionKey(buffer[begin:end])}
 
 
 # Insert Body
@@ -58,7 +66,8 @@ Number   <- [0-9] ('.' [0-9])*
 AlphaNum <- (Letter / Number)
 
 # Table defn
-SelectTable <- < AlphaNum+ > { p.SelectStatement.TableName = buffer [begin:end] }
-InsertTable <- < AlphaNum+ > { p.InsertStatement.TableName = buffer[begin:end]  }
+SelectTable <- < AlphaNum+ > { p.SelectStatement.TableName = buffer[begin:end] }
+InsertTable <- < AlphaNum+ > { p.InsertStatement.TableName = buffer[begin:end] }
+CreateTable <- < AlphaNum+ > { p.CreateStatement.TableName = buffer[begin:end] }
 
 

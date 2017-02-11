@@ -14,6 +14,12 @@ type InsertStatement struct {
 	Values    []string
 }
 
+type CreateStatement struct {
+	TableName       string
+	Columns         []string
+	PartitioningKey string
+}
+
 type sType int
 
 const (
@@ -35,4 +41,9 @@ func (s *SQL) validateInsert() {
 		fmt.Errorf(fmt.Sprintf("Columns and Values do not match. %d columns provided for %d values ", len(s.InsertStatement.Columns), len(s.InsertStatement.Values)))
 	}
 
+}
+
+func (s *SQL) setPartitionKey(v string) {
+	s.sType = Create
+	s.CreateStatement.PartitioningKey = s.CreateStatement.Columns[0]
 }

@@ -81,3 +81,29 @@ func TestInsert(t *testing.T) {
 		}
 	}
 }
+
+func TestCreate(t *testing.T) {
+	tests := []struct {
+		s    string
+		stmt CreateStatement
+	}{
+		{
+			s: `Create Table TableName( col1 , col2, col3 );`,
+			stmt: CreateStatement{
+				TableName:       "TableName",
+				Columns:         []string{"col1", "col2", "col3"},
+				PartitioningKey: "col1",
+			},
+		},
+	}
+
+	for i, eachTest := range tests {
+		got := &SQL{Buffer: eachTest.s}
+		got.Init()
+		if err := got.Parse(); assert.Nil(t, err) {
+			got.Execute()
+			assert.Equal(t, got.CreateStatement, eachTest.stmt, fmt.Sprint("Test Case %d ", i))
+		}
+	}
+
+}

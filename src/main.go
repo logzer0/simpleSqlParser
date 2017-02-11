@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	expression := `INSERT INTO inserTable(a,b,c) VALUES (1);`
+	expression := `Create Table CableName( col1, col2, col3 );`
 	calc := &SQL{Buffer: expression}
 	calc.Init()
 	if err := calc.Parse(); err != nil {
@@ -15,5 +15,5 @@ func main() {
 	}
 	calc.Print()
 	calc.Execute()
-	fmt.Println(calc.InsertStatement)
+	fmt.Println(calc.CreateStatement)
 }
