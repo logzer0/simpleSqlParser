@@ -80,11 +80,4 @@ func TestInsert(t *testing.T) {
 			assert.Equal(t, got.InsertStatement, eachTest.stmt, fmt.Sprintf("Test Case %d ", i))
 		}
 	}
-
-	// s := `Insert into tbl values( 1, "a", 1.224  );`
-	// got := &SQL{Buffer: s}
-	// got.Init()
-	// if err := got.Parse(); assert.Nil(t, err) {
-	// 	got.Execute()
-	// }
 }
