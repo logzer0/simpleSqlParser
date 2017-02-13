@@ -11,7 +11,8 @@ This grammar handles only three statements and does not support any subqueries
 
 #### Note:
 
-The Create is not full featured. It does not support any datatypes or the Primary Key. The grammar returns the first column as a Partition Key because this was written to be used by CQL like system.
+The CREATE is not full featured. It does not support any datatypes or the Primary Key. The grammar returns the first column as a Partition Key because this was written to be used by CQL like system.
 
+The INSERT and the SELECT are as expecteed. 
 
-
+For more info, look at the test file.
