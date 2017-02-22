@@ -3,21 +3,29 @@ package simpleSqlParser
 import "fmt"
 
 type SelectStatement struct {
+	Keyspace   string
 	Columns    []string
 	TableName  string
 	AllColumns bool
 }
 
 type InsertStatement struct {
+	Keyspace  string
 	TableName string
 	Columns   []string
 	Values    []string
 }
 
 type CreateStatement struct {
+	Keyspace        string
 	TableName       string
 	Columns         []string
 	PartitioningKey string
+}
+
+type DropStatement struct {
+	Keyspace  string
+	TableName string
 }
 
 type sType int
