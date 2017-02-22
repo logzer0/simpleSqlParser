@@ -5,9 +5,10 @@ type SQL Peg {
 	SelectStatement
 	InsertStatement
 	CreateStatement
+	DropStatement
 }
 
-G <- SelectStatement / InsertStatement / CreateStatement !. 
+G <- SelectStatement / InsertStatement / CreateStatement / DropStatement !. 
 
 
 # Columns defn
@@ -25,15 +26,17 @@ CreateColList <- ( _ CreateColName _ ',' _  )* CreateColName
 CreateColName <- < AlphaNum+ > { p.CreateStatement.Columns = append(p.CreateStatement.Columns, buffer[begin:end]) }
 
 
+DropStatement <- _  "DROP" _  DropTable _ ";"_
+
 # Select
-SelectStatement <-  "SELECT" _ Columns _ "FROM" _ SelectTable _";"  { p.sType = Select  }
+SelectStatement <- _  "SELECT" _ Columns _ "FROM" _ SelectTable _";" _  { p.sType = Select  }
 
 
 #Insert
-InsertStatement <-   "INSERT" _ "INTO" _ InsertBody     { p.validateInsert() }
+InsertStatement <-   _ "INSERT" _ "INTO" _ InsertBody     { p.validateInsert() }
 
 # Create
-CreateStatement <- "CREATE" _  "Table" _ CreateTable _ CreateParaColList _ ';' { p.setPartitionKey(buffer[begin:end])}
+CreateStatement <- _ "CREATE" _  "Table" _ CreateTable _ CreateParaColList _ ';' { p.setPartitionKey(buffer[begin:end])}
 
 
 # Insert Body
@@ -66,8 +69,18 @@ Number   <- [0-9] ('.' [0-9])*
 AlphaNum <- (Letter / Number)
 
 # Table defn
-SelectTable <- < AlphaNum+ > { p.SelectStatement.TableName = buffer[begin:end] }
-InsertTable <- < AlphaNum+ > { p.InsertStatement.TableName = buffer[begin:end] }
-CreateTable <- < AlphaNum+ > { p.CreateStatement.TableName = buffer[begin:end] }
+SelectTable <- SelectKeyspace "." SelectTableName
+SelectKeyspace <- < AlphaNum+ > {p.SelectStatement.Keyspace = buffer[begin:end] }
+SelectTableName <-  < AlphaNum+ >  { p.SelectStatement.TableName = buffer[begin:end] }
 
+InsertTable <- InsertKeyspace "." InsertTableName
+InsertKeyspace <- < AlphaNum+ > { p.InsertStatement.Keyspace = buffer[begin:end] }
+InsertTableName <- < AlphaNum+ > { p.InsertStatement.TableName = buffer[begin:end] }
 
+CreateTable <- CreateKeyspace "." CreateTableName
+CreateKeyspace <- < AlphaNum+ > { p.CreateStatement.Keyspace =buffer[begin:end] }
+CreateTableName <- < AlphaNum+ > { p.CreateStatement.TableName = buffer[begin:end] }
+
+DropTable <- DropTableKeyspace "." DropTableName
+DropTableKeyspace <- < AlphaNum+ > { p.DropStatement.Keyspace = buffer[begin:end] }
+DropTableName <- < AlphaNum+ > {p.DropStatement.TableName = buffer[begin:end] }

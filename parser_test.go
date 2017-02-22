@@ -13,22 +13,25 @@ func TestSelect(t *testing.T) {
 		stmt SelectStatement
 	}{
 		{
-			s: `SELECT foo FROM tbl1;`,
+			s: `SELECT foo FROM k1.tbl1; `,
 			stmt: SelectStatement{
+				Keyspace:  "k1",
 				TableName: "tbl1",
 				Columns:   []string{"foo"},
 			},
 		},
 		{
-			s: `Select * from tbl;`,
+			s: `Select * from k2.tbl;`,
 			stmt: SelectStatement{
+				Keyspace:   "k2",
 				TableName:  "tbl",
 				AllColumns: true,
 			},
 		},
 		{
-			s: `Select (col1, col2  ,  col3 ) from tbl;`,
+			s: `Select (col1, col2  ,  col3 ) from k1.tbl;`,
 			stmt: SelectStatement{
+				Keyspace:  "k1",
 				TableName: "tbl",
 				Columns:   []string{"col1", "col2", "col3"},
 			},
@@ -53,22 +56,24 @@ func TestInsert(t *testing.T) {
 		stmt InsertStatement
 	}{
 		{
-			s: `Insert into instaTbl values ( 1, "a",1.123, "d"   );`,
+			s: `Insert into k2.instaTbl values ( 1, "a",1.123, "d"   );`,
 			stmt: InsertStatement{
+				Keyspace:  "k2",
 				TableName: "instaTbl",
 				Values:    []string{"1", "a", "1.123", "d"},
 			},
 		},
 		{
-			s: `INSERT INTO insertTable(a,b,c)values("a",23434, 23.533536);`,
+			s: `INSERT INTO k1.insertTable(a,b,c)values("a",23434, 23.533536);`,
 			stmt: InsertStatement{
+				Keyspace:  "k1",
 				TableName: "insertTable",
 				Values:    []string{"a", "23434", "23.533536"},
 				Columns:   []string{"a", "b", "c"},
 			},
 		},
 		{
-			s: `INSERT INTO kaboo(a,b,c) VALUES (1);`,
+			s: `INSERT INTO k1.kaboo(a,b,c) VALUES (1);`,
 		},
 	}
 
@@ -88,8 +93,9 @@ func TestCreate(t *testing.T) {
 		stmt CreateStatement
 	}{
 		{
-			s: `Create Table TableName( col1 , col2, col3 );`,
+			s: ` Create Table keyspace.TableName( col1 , col2, col3 ); `,
 			stmt: CreateStatement{
+				Keyspace:        "keyspace",
 				TableName:       "TableName",
 				Columns:         []string{"col1", "col2", "col3"},
 				PartitioningKey: "col1",
