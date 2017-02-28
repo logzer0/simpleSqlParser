@@ -36,6 +36,16 @@ func TestSelect(t *testing.T) {
 				Columns:   []string{"col1", "col2", "col3"},
 			},
 		},
+		{
+			s: `Select * from k1.tbl where x=10;`,
+			stmt: SelectStatement{
+				Keyspace:     "k1",
+				TableName:    "tbl",
+				AllColumns:   true,
+				WhereColumns: []string{"x"},
+				WhereValues:  []string{"10"},
+			},
+		},
 	}
 
 	for i, eachTest := range tests {

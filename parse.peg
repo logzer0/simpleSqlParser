@@ -11,6 +11,17 @@ type SQL Peg {
 G <- SelectStatement / InsertStatement / CreateStatement / DropStatement !. 
 
 
+DropStatement <- _  "DROP" _  DropTable _ ";"_
+
+# Select
+SelectStatement <- _  "SELECT" _ Columns _ "FROM" _ SelectTable _ WHERE* _ LIMIT* _ ";" _  { p.sType = Select  }
+
+#Insert
+InsertStatement <-   _ "INSERT" _ "INTO" _ InsertBody     { p.validateInsert() }
+
+# Create
+CreateStatement <- _ "CREATE" _  "Table" _ CreateTable _ CreateParaColList _ ';' { p.setPartitionKey(buffer[begin:end])}
+
 # Columns defn
 Columns  <-  SelectParaColList / SelectColList / Asterisk  
 SelectParaColList <- '(' _ SelectColList  _ ')'
@@ -24,20 +35,6 @@ InsertColName <- < AlphaNum+ > { p.InsertStatement.Columns = append(p.InsertStat
 CreateParaColList <- '(' _ CreateColList _  ')'
 CreateColList <- ( _ CreateColName _ ',' _  )* CreateColName
 CreateColName <- < AlphaNum+ > { p.CreateStatement.Columns = append(p.CreateStatement.Columns, buffer[begin:end]) }
-
-
-DropStatement <- _  "DROP" _  DropTable _ ";"_
-
-# Select
-SelectStatement <- _  "SELECT" _ Columns _ "FROM" _ SelectTable _";" _  { p.sType = Select  }
-
-
-#Insert
-InsertStatement <-   _ "INSERT" _ "INTO" _ InsertBody     { p.validateInsert() }
-
-# Create
-CreateStatement <- _ "CREATE" _  "Table" _ CreateTable _ CreateParaColList _ ';' { p.setPartitionKey(buffer[begin:end])}
-
 
 # Insert Body
 InsertBody <-   InsertTable  _ Values _ ";"   
@@ -84,3 +81,16 @@ CreateTableName <- < AlphaNum+ > { p.CreateStatement.TableName = buffer[begin:en
 DropTable <- DropTableKeyspace "." DropTableName
 DropTableKeyspace <- < AlphaNum+ > { p.DropStatement.Keyspace = buffer[begin:end] }
 DropTableName <- < AlphaNum+ > {p.DropStatement.TableName = buffer[begin:end] }
+
+
+#WHERE defn
+WHERE <- "WHERE" _  FILTERS+
+FILTERS <- (FILTER _  "and" )* FILTER
+FILTER <- _ FilterColumn _ "=" _ FilterValue _ 
+FilterColumn <- < AlphaNum+ >  { p.SelectStatement.WhereColumns = append(p.SelectStatement.WhereColumns, buffer[begin:end])  }
+FilterValue  <-  < AlphaNum+ > { p.SelectStatement.WhereValues = append(p.SelectStatement.WhereValues, buffer[begin:end]) }
+
+
+#LIMIT Defn
+LIMIT <- "LIMIT" _ LimitVal
+LimitVal <- < Number > { var err error;  p.SelectStatement.Limit,err = strconv.Atoi(buffer[begin:end]); if err!=nil{ p.SelectStatement.Limit = -1  };   }

@@ -3,10 +3,14 @@ package simpleSqlParser
 import "fmt"
 
 type SelectStatement struct {
-	Keyspace   string
-	Columns    []string
-	TableName  string
-	AllColumns bool
+	Keyspace     string
+	Columns      []string
+	TableName    string
+	AllColumns   bool
+	WhereColumns []string
+	WhereValues  []string
+	Where        map[string]string
+	Limit        int
 }
 
 type InsertStatement struct {
