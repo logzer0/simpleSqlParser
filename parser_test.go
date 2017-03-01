@@ -44,6 +44,42 @@ func TestSelect(t *testing.T) {
 				AllColumns:   true,
 				WhereColumns: []string{"x"},
 				WhereValues:  []string{"10"},
+				Where: map[string]string{
+					"x": "10",
+				},
+				Operators: []string{"="},
+			},
+		},
+		{
+			s: `Select * from k1.tbl where x>10 and y=abc;`,
+			stmt: SelectStatement{
+				Keyspace:     "k1",
+				TableName:    "tbl",
+				AllColumns:   true,
+				WhereColumns: []string{"x", "y"},
+				WhereValues:  []string{"10", "abc"},
+				Where: map[string]string{
+					"x": "10",
+					"y": "abc",
+				},
+				Operators: []string{">", "="},
+			},
+		},
+		{
+			s: `Select * from k1.tbl where x>10 and y=abc and z<=3.43 limit 300;`,
+			stmt: SelectStatement{
+				Keyspace:     "k1",
+				TableName:    "tbl",
+				AllColumns:   true,
+				WhereColumns: []string{"x", "y"},
+				WhereValues:  []string{"10", "abc"},
+				Where: map[string]string{
+					"x": "10",
+					"y": "abc",
+					"z": "3.43",
+				},
+				Operators: []string{">", "=", "<="},
+				Limit:     int(300),
 			},
 		},
 	}
