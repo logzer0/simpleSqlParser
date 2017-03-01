@@ -1,4 +1,4 @@
-package simpleSqlParser
+package main
 
 type SQL Peg {
 	sType 
@@ -87,7 +87,9 @@ DropTableName <- < AlphaNum+ > {p.DropStatement.TableName = buffer[begin:end] }
 WHERE <- "WHERE" _  FILTERS+ {  p.finalizeSelect();  }
 FILTERS <- (FILTER _  "and" )* FILTER
 FILTER <- _ FilterColumn _ Operation _ FilterValue _ 
-Operation <- < "=" / ">" / "<" / ">=" /"<=" > { p.SelectStatement.Operators= append(p.SelectStatement.Operators, buffer[begin:end]) }
+
+Operation <- < "=" / ">" / "<"   > { p.SelectStatement.Operators= append(p.SelectStatement.Operators, buffer[begin:end]) }
+
 FilterColumn <- < AlphaNum+ >  { p.SelectStatement.WhereColumns = append(p.SelectStatement.WhereColumns, buffer[begin:end])  }
 FilterValue  <-  < AlphaNum+ > { p.SelectStatement.WhereValues = append(p.SelectStatement.WhereValues, buffer[begin:end]) }
 

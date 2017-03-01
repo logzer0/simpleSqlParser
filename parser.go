@@ -1,4 +1,4 @@
-package simpleSqlParser
+package main
 
 import "fmt"
 

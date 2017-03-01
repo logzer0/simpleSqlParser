@@ -1,4 +1,4 @@
-package simpleSqlParser
+package main
 
 import (
 	"fmt"
@@ -66,20 +66,20 @@ func TestSelect(t *testing.T) {
 			},
 		},
 		{
-			s: `Select * from k1.tbl where x>10 and y=abc and z<=3.43 limit 300;`,
+			s: `Select * from k1.tbl where x>10 and y < abc and z= 3.122 limit 5 ;`,
 			stmt: SelectStatement{
 				Keyspace:     "k1",
 				TableName:    "tbl",
 				AllColumns:   true,
-				WhereColumns: []string{"x", "y"},
-				WhereValues:  []string{"10", "abc"},
+				WhereColumns: []string{"x", "y", "z"},
+				WhereValues:  []string{"10", "abc", "3.122"},
 				Where: map[string]string{
 					"x": "10",
 					"y": "abc",
-					"z": "3.43",
+					"z": "3.122",
 				},
-				Operators: []string{">", "=", "<="},
-				Limit:     int(300),
+				Operators: []string{">", "<", "="},
+				Limit:     int(5),
 			},
 		},
 	}
@@ -87,9 +87,9 @@ func TestSelect(t *testing.T) {
 	for i, eachTest := range tests {
 		got := &SQL{Buffer: eachTest.s}
 		got.Init()
-		if err := got.Parse(); assert.Nil(t, err) {
+		if err := got.Parse(); assert.Nil(t, err, fmt.Sprintf("Test Case %d", i)) {
 			got.Execute()
-			assert.Equal(t, got.SelectStatement, eachTest.stmt, fmt.Sprint("Test Case %d ", i))
+			assert.Equal(t, got.SelectStatement, eachTest.stmt, fmt.Sprintf("Test Case %d ", i))
 		}
 
 	}
