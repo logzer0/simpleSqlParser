@@ -1,4 +1,4 @@
-package main
+package simpleSqlParser
 
 import (
 	"fmt"
@@ -9,12 +9,12 @@ import (
 
 func TestSelect(t *testing.T) {
 	tests := []struct {
-		s    string
-		stmt SelectStatement
+		s            string
+		expectedStmt SelectStatement
 	}{
 		{
 			s: `SELECT foo FROM k1.tbl1; `,
-			stmt: SelectStatement{
+			expectedStmt: SelectStatement{
 				Keyspace:  "k1",
 				TableName: "tbl1",
 				Columns:   []string{"foo"},
@@ -22,7 +22,7 @@ func TestSelect(t *testing.T) {
 		},
 		{
 			s: `Select * from k2.tbl;`,
-			stmt: SelectStatement{
+			expectedStmt: SelectStatement{
 				Keyspace:   "k2",
 				TableName:  "tbl",
 				AllColumns: true,
@@ -30,7 +30,7 @@ func TestSelect(t *testing.T) {
 		},
 		{
 			s: `Select (col1, col2  ,  col3 ) from k1.tbl;`,
-			stmt: SelectStatement{
+			expectedStmt: SelectStatement{
 				Keyspace:  "k1",
 				TableName: "tbl",
 				Columns:   []string{"col1", "col2", "col3"},
@@ -38,48 +38,36 @@ func TestSelect(t *testing.T) {
 		},
 		{
 			s: `Select * from k1.tbl where x=10;`,
-			stmt: SelectStatement{
+			expectedStmt: SelectStatement{
 				Keyspace:     "k1",
 				TableName:    "tbl",
 				AllColumns:   true,
 				WhereColumns: []string{"x"},
 				WhereValues:  []string{"10"},
-				Where: map[string]string{
-					"x": "10",
-				},
-				Operators: []string{"="},
+				Operators:    []string{"="},
 			},
 		},
 		{
 			s: `Select * from k1.tbl where x>10 and y=abc;`,
-			stmt: SelectStatement{
+			expectedStmt: SelectStatement{
 				Keyspace:     "k1",
 				TableName:    "tbl",
 				AllColumns:   true,
 				WhereColumns: []string{"x", "y"},
 				WhereValues:  []string{"10", "abc"},
-				Where: map[string]string{
-					"x": "10",
-					"y": "abc",
-				},
-				Operators: []string{">", "="},
+				Operators:    []string{">", "="},
 			},
 		},
 		{
-			s: `Select * from k1.tbl where x>10 and y < abc and z= 3.122 limit 5 ;`,
-			stmt: SelectStatement{
+			s: `Select * from k1.tbl where x>=10 and y < abc and z= 3.122 limit 5 ;`,
+			expectedStmt: SelectStatement{
 				Keyspace:     "k1",
 				TableName:    "tbl",
 				AllColumns:   true,
 				WhereColumns: []string{"x", "y", "z"},
 				WhereValues:  []string{"10", "abc", "3.122"},
-				Where: map[string]string{
-					"x": "10",
-					"y": "abc",
-					"z": "3.122",
-				},
-				Operators: []string{">", "<", "="},
-				Limit:     int(5),
+				Operators:    []string{">=", "<", "="},
+				Limit:        int(5),
 			},
 		},
 	}
@@ -89,7 +77,7 @@ func TestSelect(t *testing.T) {
 		got.Init()
 		if err := got.Parse(); assert.Nil(t, err, fmt.Sprintf("Test Case %d", i)) {
 			got.Execute()
-			assert.Equal(t, got.SelectStatement, eachTest.stmt, fmt.Sprintf("Test Case %d ", i))
+			assert.Equal(t, eachTest.expectedStmt, got.SelectStatement, fmt.Sprintf("Test Case %d ", i))
 		}
 
 	}
@@ -98,12 +86,12 @@ func TestSelect(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	tests := []struct {
-		s    string
-		stmt InsertStatement
+		s            string
+		expectedStmt InsertStatement
 	}{
 		{
 			s: `Insert into k2.instaTbl values ( 1, "a",1.123, "d"   );`,
-			stmt: InsertStatement{
+			expectedStmt: InsertStatement{
 				Keyspace:  "k2",
 				TableName: "instaTbl",
 				Values:    []string{"1", "a", "1.123", "d"},
@@ -111,7 +99,7 @@ func TestInsert(t *testing.T) {
 		},
 		{
 			s: `INSERT INTO k1.insertTable(a,b,c)values("a",23434, 23.533536);`,
-			stmt: InsertStatement{
+			expectedStmt: InsertStatement{
 				Keyspace:  "k1",
 				TableName: "insertTable",
 				Values:    []string{"a", "23434", "23.533536"},
@@ -128,19 +116,19 @@ func TestInsert(t *testing.T) {
 		got.Init()
 		if err := got.Parse(); assert.Nil(t, err) {
 			got.Execute()
-			assert.Equal(t, got.InsertStatement, eachTest.stmt, fmt.Sprintf("Test Case %d ", i))
+			assert.Equal(t, eachTest.expectedStmt, got.InsertStatement, fmt.Sprintf("Test Case %d ", i))
 		}
 	}
 }
 
 func TestCreate(t *testing.T) {
 	tests := []struct {
-		s    string
-		stmt CreateStatement
+		s            string
+		expectedStmt CreateStatement
 	}{
 		{
 			s: ` Create Table keyspace.TableName( col1 , col2, col3 ); `,
-			stmt: CreateStatement{
+			expectedStmt: CreateStatement{
 				Keyspace:        "keyspace",
 				TableName:       "TableName",
 				Columns:         []string{"col1", "col2", "col3"},
@@ -154,7 +142,7 @@ func TestCreate(t *testing.T) {
 		got.Init()
 		if err := got.Parse(); assert.Nil(t, err) {
 			got.Execute()
-			assert.Equal(t, got.CreateStatement, eachTest.stmt, fmt.Sprint("Test Case %d ", i))
+			assert.Equal(t, got.CreateStatement, eachTest.expectedStmt, fmt.Sprint("Test Case %d ", i))
 		}
 	}
 
