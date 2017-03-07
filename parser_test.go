@@ -147,3 +147,28 @@ func TestCreate(t *testing.T) {
 	}
 
 }
+
+func TestDrop(t *testing.T) {
+	tests := []struct {
+		s            string
+		expectedStmt DropStatement
+	}{
+		{
+			s: `Drop keyspace.Tbl;`,
+			expectedStmt: DropStatement{
+				Keyspace:  "keyspace",
+				TableName: "Tbl",
+			},
+		},
+	}
+
+	for i, eachTest := range tests {
+		got := &SQL{Buffer: eachTest.s}
+		got.Init()
+		if err := got.Parse(); assert.Nil(t, err) {
+			got.Execute()
+			assert.Equal(t, got.DropStatement, eachTest.expectedStmt, fmt.Sprint("Test Case %d ", i))
+		}
+	}
+
+}
