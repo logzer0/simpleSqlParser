@@ -9,7 +9,6 @@ type SelectStatement struct {
 	AllColumns   bool
 	WhereColumns []string
 	WhereValues  []string
-	Where        map[string]string
 	Limit        int
 	Operators    []string
 }
@@ -59,11 +58,4 @@ func (s *SQL) validateInsert() {
 func (s *SQL) setPartitionKey(v string) {
 	s.sType = Create
 	s.CreateStatement.PartitioningKey = s.CreateStatement.Columns[0]
-}
-
-func (s *SQL) finalizeSelect() {
-	s.Where = make(map[string]string)
-	for indx, v := range s.SelectStatement.WhereColumns {
-		s.Where[v] = s.WhereValues[indx]
-	}
 }

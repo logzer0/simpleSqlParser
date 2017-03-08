@@ -84,10 +84,18 @@ DropTableName <- < AlphaNum+ > {p.DropStatement.TableName = buffer[begin:end] }
 
 
 #WHERE defn
-WHERE <- "WHERE" _  FILTERS+ {  p.finalizeSelect();  }
+WHERE <- "WHERE" _  FILTERS+ 
 FILTERS <- (FILTER _  "and" )* FILTER
 FILTER <- _ FilterColumn _ Operation _ FilterValue _ 
-Operation <- < "=" / ">" / "<" / ">=" /"<=" > { p.SelectStatement.Operators= append(p.SelectStatement.Operators, buffer[begin:end]) }
+
+
+Operation <- Equality / LessThan / GreaterThan
+
+Equality <- < "=" > { p.SelectStatement.Operators= append(p.SelectStatement.Operators, buffer[begin:end]) }
+LessThan <- < "<" "="? >{ p.SelectStatement.Operators= append(p.SelectStatement.Operators, buffer[begin:end]) }
+GreaterThan <- < ">" "="? > { p.SelectStatement.Operators= append(p.SelectStatement.Operators, buffer[begin:end]) }
+
+
 FilterColumn <- < AlphaNum+ >  { p.SelectStatement.WhereColumns = append(p.SelectStatement.WhereColumns, buffer[begin:end])  }
 FilterValue  <-  < AlphaNum+ > { p.SelectStatement.WhereValues = append(p.SelectStatement.WhereValues, buffer[begin:end]) }
 
