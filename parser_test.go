@@ -172,3 +172,42 @@ func TestDrop(t *testing.T) {
 	}
 
 }
+
+func TestDelete(t *testing.T) {
+	tests := []struct {
+		s            string
+		expectedStmt DeleteStatement
+	}{
+		{
+			s: `Delete from k1.tbl where x=10;`,
+			expectedStmt: DeleteStatement{
+				Keyspace:     "k1",
+				TableName:    "tbl",
+				WhereColumns: []string{"x"},
+				WhereValues:  []string{"10"},
+				Operators:    []string{"="},
+			},
+		},
+		{
+			s: `Delete from k1.tbl where x>10 and y=abc;`,
+			expectedStmt: DeleteStatement{
+				Keyspace:     "k1",
+				TableName:    "tbl",
+				WhereColumns: []string{"x", "y"},
+				WhereValues:  []string{"10", "abc"},
+				Operators:    []string{">", "="},
+			},
+		},
+	}
+
+	for i, eachTest := range tests {
+		got := &SQL{Buffer: eachTest.s}
+		got.Init()
+		if err := got.Parse(); assert.Nil(t, err, fmt.Sprintf("Test Case %d", i)) {
+			got.Execute()
+			assert.Equal(t, eachTest.expectedStmt, got.DeleteStatement, fmt.Sprintf("Test Case %d ", i))
+		}
+
+	}
+
+}
