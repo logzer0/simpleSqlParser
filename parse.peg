@@ -107,19 +107,18 @@ SelectFilterValue  <-  < AlphaNum+ > { p.SelectStatement.WhereValues = append(p.
 
 
 #WHEREDELETE defn
-WHEREDELETE <- "WHERE" _  DELETEFILTERS+ 
-DELETEFILTERS <- (DELETEFILTER _  "and" )* DELETEFILTER
+WHEREDELETE <- "WHERE" _  DELETEFILTER
 DELETEFILTER <- _ DeleteFilterColumn _ DeleteOperation _ DeleteFilterValue _ 
 
 DeleteOperation <- DeleteEquality / DeleteLessThan / DeleteGreaterThan
 
-DeleteEquality <- < "=" > { p.DeleteStatement.Operators= append(p.DeleteStatement.Operators, buffer[begin:end]) }
-DeleteLessThan <- < "<" "="? >{ p.DeleteStatement.Operators= append(p.DeleteStatement.Operators, buffer[begin:end]) }
-DeleteGreaterThan <- < ">" "="? > { p.DeleteStatement.Operators= append(p.DeleteStatement.Operators, buffer[begin:end]) }
+DeleteEquality <- < "=" > { p.DeleteStatement.Operator=  buffer[begin:end] }
+DeleteLessThan <- < "<" "="? >{ p.DeleteStatement.Operator=  buffer[begin:end] }
+DeleteGreaterThan <- < ">" "="? > { p.DeleteStatement.Operator=  buffer[begin:end] }
 
 
-DeleteFilterColumn <- < AlphaNum+ >  { p.DeleteStatement.WhereColumns = append(p.DeleteStatement.WhereColumns, buffer[begin:end])  }
-DeleteFilterValue  <-  < AlphaNum+ > { p.DeleteStatement.WhereValues = append(p.DeleteStatement.WhereValues, buffer[begin:end]) }
+DeleteFilterColumn <- < AlphaNum+ >  { p.DeleteStatement.WhereColumn =  buffer[begin:end]  }
+DeleteFilterValue  <-  < AlphaNum+ > { p.DeleteStatement.WhereValue =  buffer[begin:end] }
 
 
 #LIMIT Defn
