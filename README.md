@@ -18,6 +18,8 @@ The table names in all the queries must  be qualified with a keyspace like `keys
 The CREATE is not full featured. It does not support any datatypes or the Primary Key.
 The grammar returns the first column as a Partition Key because this was written to be used by CQL like system.
 
-The INSERT, SELECT, DROP, DELETE are standard. 
+The DELETE is not fully featured. It accepts only one WHERE condition
+
+The INSERT, SELECT, DROP are standard. 
 
 For more info, look at the test file.
