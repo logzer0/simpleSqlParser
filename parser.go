@@ -14,11 +14,11 @@ type SelectStatement struct {
 }
 
 type DeleteStatement struct {
-	Keyspace     string
-	TableName    string
-	WhereColumns []string
-	WhereValues  []string
-	Operators    []string
+	Keyspace    string
+	TableName   string
+	WhereColumn string
+	WhereValue  string
+	Operator    string
 }
 
 type InsertStatement struct {

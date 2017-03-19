@@ -181,21 +181,21 @@ func TestDelete(t *testing.T) {
 		{
 			s: `Delete from k1.tbl where x=10;`,
 			expectedStmt: DeleteStatement{
-				Keyspace:     "k1",
-				TableName:    "tbl",
-				WhereColumns: []string{"x"},
-				WhereValues:  []string{"10"},
-				Operators:    []string{"="},
+				Keyspace:    "k1",
+				TableName:   "tbl",
+				WhereColumn: "x",
+				WhereValue:  "10",
+				Operator:    "=",
 			},
 		},
 		{
-			s: `Delete from k1.tbl where x>10 and y=abc;`,
+			s: `Delete from k1.tbl where x>=10;`,
 			expectedStmt: DeleteStatement{
-				Keyspace:     "k1",
-				TableName:    "tbl",
-				WhereColumns: []string{"x", "y"},
-				WhereValues:  []string{"10", "abc"},
-				Operators:    []string{">", "="},
+				Keyspace:    "k1",
+				TableName:   "tbl",
+				WhereColumn: "x",
+				WhereValue:  "10",
+				Operator:    ">=",
 			},
 		},
 	}
